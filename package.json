@@ -1,0 +1,23 @@
+{
+  "name": "imd-course",
+  "version": "1.0.0",
+  "description": "Інтелектуальні системи аналізу медичних зображень та комп’ютерної діагностики — магістерський курс, КПІ",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build": "vitepress build .",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "puppeteer-core": "^25.9.0",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.41"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-serif": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0"
+  }
+}

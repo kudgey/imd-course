@@ -1,0 +1,15 @@
+node_modules/
+.vitepress/dist/
+.vitepress/cache/
+.vercel
+.DS_Store
+*.log
+# скрипти аудиту й скриншоти — інструменти автора, не частина сайту
+checkbase.mjs
+audit.mjs
+mathcheck.mjs
+navtest.mjs
+shot*.mjs
+*.png
+!public/**/*.png
+README.md
