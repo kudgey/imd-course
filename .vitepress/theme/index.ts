@@ -15,7 +15,9 @@ import Timeline from './components/Timeline.vue'
 import Resources from './components/Resources.vue'
 import Flow from './components/Flow.vue'
 
-// Віджети лекцій (*Lab.vue) реєструються тут по мірі появи.
+// Віджети лекцій (*Lab.vue) реєструються автоматично за іменем файлу:
+// новий віджет не потребує правки цього файла.
+const labs = import.meta.glob('./components/*Lab.vue', { eager: true }) as Record<string, { default: any }>
 
 export default {
   extends: DefaultTheme,
@@ -35,5 +37,8 @@ export default {
     app.component('Timeline', Timeline)
     app.component('Resources', Resources)
     app.component('Flow', Flow)
+    for (const [path, mod] of Object.entries(labs)) {
+      app.component(path.split('/').pop()!.replace('.vue', ''), mod.default)
+    }
   },
 } satisfies Theme

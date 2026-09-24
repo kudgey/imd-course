@@ -1,0 +1,32 @@
+# Середовище студента для лабораторних робіт курсу «Аналіз медичних зображень»
+# Python 3.12 (перевірено у чистому venv на macOS arm64). Встановлення:
+#   python3.12 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements-students.txt
+# Версії закріплені: відтворюваність — частина кожної лабораторної.
+
+numpy==2.4.2
+scipy==1.17.0
+pandas==3.0.0
+matplotlib==3.10.8
+Pillow==12.1.1
+scikit-image==0.26.0
+scikit-learn==1.8.0
+lightgbm==4.6.0
+
+pydicom==3.0.1
+nibabel==5.3.3
+SimpleITK==2.5.3
+
+torch==2.10.0
+torchvision==0.25.0
+monai==1.5.2
+timm==1.0.22
+segmentation-models-pytorch==0.5.0
+albumentations==2.0.8
+torchxrayvision==1.4.0
+medmnist==3.0.2
+grad-cam==1.5.7
+
+notebook==7.6.3
+ipykernel==7.2.0
+tqdm==4.67.3

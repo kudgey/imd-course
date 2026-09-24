@@ -22,6 +22,9 @@ export default defineConfig({
   base,
   cleanUrls: true,
   srcExclude: ['README.md'],
+  // .ipynb лежить у public/ як файл для завантаження; VitePress шукає таку сторінку
+  // й вважає посилання мертвим. Наявність файла перевіряє tools/check_links.py.
+  ignoreDeadLinks: [/\.ipynb$/],
   markdown: {
     math: true,
     lineNumbers: true,
