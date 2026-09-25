@@ -101,6 +101,7 @@ const kLen = computed(() => Math.hypot(...kStep.value))
     <div class="vm__grid">
       <div>
         <div class="vm__cap">Матриця affine у LPS, мм (стовпці: крок за i, за j, за k і положення першого вокселя)</div>
+        <div class="vm__scroll">
         <table class="vm__mat">
           <tbody>
             <tr>
@@ -115,6 +116,7 @@ const kLen = computed(() => Math.hypot(...kStep.value))
             </tr>
           </tbody>
         </table>
+        </div>
         <div class="vm__cap">
           Крок k → k + 1 зсуває точку на ({{ f(kStep[0]) }}; {{ f(kStep[1]) }}; {{ f(kStep[2]) }}) мм,
           довжина кроку {{ f(kLen) }} мм.
@@ -155,7 +157,8 @@ const kLen = computed(() => Math.hypot(...kStep.value))
 }
 @media (max-width: 760px) { .vm__grid { grid-template-columns: 1fr; } }
 .vm__cap { font-size: 0.78rem; color: var(--vp-c-text-3); margin: 0.2rem 0 0.45rem; line-height: 1.45; }
-.vm__mat { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.vm__scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.vm__mat { width: 100%; min-width: 300px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .vm__mat th {
   font-size: 0.72rem;
   font-weight: 500;
@@ -174,4 +177,9 @@ const kLen = computed(() => Math.hypot(...kStep.value))
 .vm__mat td.is-hot { color: var(--uk-warm); font-weight: 600; }
 .vm__stats { grid-template-columns: 1fr; margin-top: 0; }
 .vm__stats b { font-size: 1.05rem; }
+@media (max-width: 480px) {
+  .vm__mat th { font-size: 0.64rem; padding: 0.15rem 0.2rem !important; }
+  .vm__mat td { font-size: 0.7rem; padding: 0.2rem 0.2rem !important; }
+  .vm__stats b { font-size: 0.95rem; }
+}
 </style>

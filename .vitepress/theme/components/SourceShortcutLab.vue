@@ -178,4 +178,11 @@ rect.ss__norm, rect.ss__tb { fill-opacity: 0.8; }
 .ss__dot.ss__norm { background: var(--uk-accent); }
 .ss__dot.ss__tb { background: var(--uk-warm); }
 .ss__line { display: inline-block; width: 18px; border-top: 1.5px dashed var(--uk-ink); margin-right: 0.3rem; vertical-align: 3px; }
+.lab__pill { text-align: left; }
+/* 375 px: SVG стискається приблизно до 0,8 — підписи осей більші, поля віджета вужчі */
+@media (max-width: 480px) {
+  .lab { padding: 1rem 0.8rem; }
+  .ss__tick { font-size: 11px; }
+  .ss__lbl { font-size: 11.5px; }
+}
 </style>

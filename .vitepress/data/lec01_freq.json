@@ -1,0 +1,131 @@
+{
+ "source": "формули блоку коду 4 лекції; поширеності — числа зі сторінки",
+ "N": 10000,
+ "prevalence": [
+  {
+   "key": "vn",
+   "label": "скринінг, В’єтнам: оцінка поширеності, скоригована 0,322 %",
+   "num": 322,
+   "den": 100000,
+   "shown": "0,322 %"
+  },
+  {
+   "key": "qin",
+   "label": "triage: 15,3 % (Qin et al., 2021)",
+   "num": 3675,
+   "den": 23954,
+   "shown": "15,3 %"
+  },
+  {
+   "key": "course",
+   "label": "навчальна вибірка курсу: 49,25 %",
+   "num": 394,
+   "den": 800,
+   "shown": "49,25 %"
+  }
+ ],
+ "tests": [
+  {
+   "key": "min",
+   "label": "мінімальні цілі WHO",
+   "sens": 90,
+   "spec": 70
+  },
+  {
+   "key": "opt",
+   "label": "бажані цілі WHO",
+   "sens": 95,
+   "spec": 80
+  }
+ ],
+ "default": {
+  "prevalence": "vn",
+  "test": "min"
+ },
+ "expect": {
+  "vn|min": {
+   "sick": 32,
+   "healthy": 9968,
+   "tp": 29,
+   "fn": 3,
+   "fp": 2990,
+   "tn": 6978,
+   "pos": 3019,
+   "ppv_pct": 0.96,
+   "fp_per_tp": 103.1,
+   "n_per_tp": 344.83,
+   "nns": 310.56,
+   "pos_pct": 30.2
+  },
+  "vn|opt": {
+   "sick": 32,
+   "healthy": 9968,
+   "tp": 30,
+   "fn": 2,
+   "fp": 1994,
+   "tn": 7974,
+   "pos": 2024,
+   "ppv_pct": 1.48,
+   "fp_per_tp": 66.47,
+   "n_per_tp": 333.33,
+   "nns": 310.56,
+   "pos_pct": 20.2
+  },
+  "qin|min": {
+   "sick": 1534,
+   "healthy": 8466,
+   "tp": 1381,
+   "fn": 153,
+   "fp": 2540,
+   "tn": 5926,
+   "pos": 3921,
+   "ppv_pct": 35.22,
+   "fp_per_tp": 1.84,
+   "n_per_tp": 7.24,
+   "nns": 6.52,
+   "pos_pct": 39.2
+  },
+  "qin|opt": {
+   "sick": 1534,
+   "healthy": 8466,
+   "tp": 1457,
+   "fn": 77,
+   "fp": 1693,
+   "tn": 6773,
+   "pos": 3150,
+   "ppv_pct": 46.25,
+   "fp_per_tp": 1.16,
+   "n_per_tp": 6.86,
+   "nns": 6.52,
+   "pos_pct": 31.5
+  },
+  "course|min": {
+   "sick": 4925,
+   "healthy": 5075,
+   "tp": 4432,
+   "fn": 493,
+   "fp": 1523,
+   "tn": 3552,
+   "pos": 5955,
+   "ppv_pct": 74.42,
+   "fp_per_tp": 0.34,
+   "n_per_tp": 2.26,
+   "nns": 2.03,
+   "pos_pct": 59.5
+  },
+  "course|opt": {
+   "sick": 4925,
+   "healthy": 5075,
+   "tp": 4679,
+   "fn": 246,
+   "fp": 1015,
+   "tn": 4060,
+   "pos": 5694,
+   "ppv_pct": 82.17,
+   "fp_per_tp": 0.22,
+   "n_per_tp": 2.14,
+   "nns": 2.03,
+   "pos_pct": 56.9
+  }
+ }
+}

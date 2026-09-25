@@ -745,3 +745,8 @@ html.uk-pres .uk-figure__frame img {
 /* сітки віджетів не мають розповзатися ширше за колонку */
 .lab > div,
 .lab section { min-width: 0; }
+
+/* Режим презентації на телефоні не потрібен, а плаваюча кнопка перекриває текст */
+@media (max-width: 720px) {
+  .uk-pres-toggle { display: none !important; }
+}
