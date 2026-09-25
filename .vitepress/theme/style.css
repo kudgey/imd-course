@@ -181,6 +181,19 @@ html {
   font-size: 0.86em;
 }
 
+/* Телефон: широка таблиця прокручується всередині себе, а не розтягує сторінку
+   (перевірка 375 px у tools/audit.mjs). На широкому екрані лишається display: table. */
+@media (max-width: 720px) {
+  .vp-doc table:not(.lab table) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.86rem;
+  }
+  .vp-doc table:not(.lab table) th,
+  .vp-doc table:not(.lab table) td { min-width: 7.5rem; }
+}
+
 /* --- ілюстрації ---------------------------------------------------------- */
 
 .uk-figure {
