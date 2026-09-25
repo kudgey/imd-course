@@ -5,6 +5,7 @@ import './style.css'
 
 import Figure from './components/Figure.vue'
 import RunOutput from './components/RunOutput.vue'
+import CodeFold from './components/CodeFold.vue'
 import PresToggle from './components/PresToggle.vue'
 import CourseHome from './components/CourseHome.vue'
 import Materials from './components/Materials.vue'
@@ -29,6 +30,7 @@ export default {
   enhanceApp({ app }) {
     app.component('Figure', Figure)
     app.component('RunOutput', RunOutput)
+    app.component('CodeFold', CodeFold)
     app.component('CourseHome', CourseHome)
     app.component('Materials', Materials)
     app.component('Cards', Cards)
