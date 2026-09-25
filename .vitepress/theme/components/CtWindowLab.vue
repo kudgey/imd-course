@@ -4,6 +4,9 @@
  * (PS3.3 C.11.2.1.2.1) — тією самою функцією, що в блоці коду розділу «Вікно відображення».
  * Об’єм: /data/lec03/lidc0001_128x128x133_int16.bin — кожен четвертий рядок і стовпець
  * (роздільність у площині знижено в 4 рази), HU під курсором — значення цих вокселів.
+ * Об’єм (≈ 2,4 МБ стиснутого трафіку) вантажиться ЛИШЕ на вимогу: кнопкою або першою спробою
+ * гортати зрізи чи змінити площину. Одразу вантажиться тільки еталонний зріз (32 КБ) — на ньому
+ * вікно, HU під курсором і гістограма працюють без усієї серії.
  * Частки чорних і білих вокселів рахуються з точної гістограми еталонного зрізу z = −117,5 мм
  * у повній роздільності 512 × 512, тож на пресетах збігаються з виводом коду: тег серії −600/1600 →
  * 0,0 % і 5,0 %; пара 1 LIDC-IDRI-0957 45/400 → 60,8 % і 4,5 %; пара 2 −400/1750 → 0,0 % і 0,8 %;
@@ -29,7 +32,10 @@ const kRef = data.k_ref as number
 const NOD = data.nodule as number[]                   // центр вузла (i, j) у повній роздільності
 
 const vol = shallowRef<Int16Array | null>(null)
-const status = ref<'loading' | 'ok' | 'error'>('loading')
+const refSlice = shallowRef<Int16Array | null>(null)
+const status = ref<'idle' | 'loading' | 'ok' | 'error'>('idle')   // уся серія
+const refStatus = ref<'loading' | 'ok' | 'error'>('loading')        // еталонний зріз
+const progress = ref(0)
 const plane = ref<Plane>('axial')
 const k = ref(kRef)
 const j = ref(Math.round(NOD[1] / STEP))
@@ -47,6 +53,7 @@ const PLANES: { id: Plane; label: string }[] = [
 
 const num = (v: number, d = 0) => v.toFixed(d).replace('.', ',').replace('-', '−')
 const pct = (v: number) => num(v * 100, 1) + ' %'
+const mb = (bytes: number) => num(bytes / 1e6, 1)
 const spaced = (v: number) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 
 const lo = computed(() => c.value - 0.5 - (w.value - 1) / 2)
@@ -85,10 +92,18 @@ function voxelAt(x: number, y: number): [number, number, number] {
   return [NZ - 1 - y, x, i.value]
 }
 
+/** HU вокселя: з об’єму, а поки його немає — з еталонного зрізу (лише k = kRef) */
+function sample(kk: number, jj: number, ii: number): number | null {
+  const v = vol.value
+  if (v) return v[(kk * NY + jj) * NX + ii]
+  const r = refSlice.value
+  return r && kk === kRef ? r[jj * NX + ii] : null
+}
+const canDraw = computed(() => !!vol.value || (plane.value === 'axial' && k.value === kRef && !!refSlice.value))
+
 function draw() {
   const cv = canvas.value
-  const v = vol.value
-  if (!cv || !v) return
+  if (!cv || !canDraw.value) return
   const { w: W, h: H } = dims.value
   cv.width = W
   cv.height = H
@@ -100,7 +115,7 @@ function draw() {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const [kk, jj, ii] = voxelAt(x, y)
-      const g = lut[v[(kk * NY + jj) * NX + ii] - data.vmin]
+      const g = lut[(sample(kk, jj, ii) as number) - data.vmin]
       const p = 4 * (y * W + x)
       img.data[p] = g
       img.data[p + 1] = g
@@ -111,25 +126,72 @@ function draw() {
   ctx.putImageData(img, 0, 0)
 }
 
+/** Файли — int16 little endian */
+function toInt16(buf: ArrayBuffer): Int16Array {
+  if (new Uint8Array(new Uint16Array([1]).buffer)[0] === 1) return new Int16Array(buf)
+  const dv = new DataView(buf)
+  const arr = new Int16Array(buf.byteLength / 2)
+  for (let n = 0; n < arr.length; n++) arr[n] = dv.getInt16(2 * n, true)
+  return arr
+}
+
 onMounted(async () => {
+  try {
+    const res = await fetch(withBase(data.ref_bin as string))
+    if (!res.ok) throw new Error(String(res.status))
+    refSlice.value = toInt16(await res.arrayBuffer())
+    refStatus.value = 'ok'
+  } catch {
+    refStatus.value = 'error'
+  }
+})
+
+/** Уся серія — лише на вимогу; прогрес — за розпакованими байтами відомого розміру */
+async function ensureVolume() {
+  if (status.value === 'loading' || status.value === 'ok') return
+  status.value = 'loading'
+  progress.value = 0
   try {
     const res = await fetch(withBase(data.bin as string))
     if (!res.ok) throw new Error(String(res.status))
-    const buf = await res.arrayBuffer()
-    const little = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1
-    let arr = new Int16Array(buf)
-    if (!little) {
-      const dv = new DataView(buf)
-      arr = new Int16Array(buf.byteLength / 2)
-      for (let n = 0; n < arr.length; n++) arr[n] = dv.getInt16(2 * n, true)
+    const total = data.bin_bytes as number
+    let buf: ArrayBuffer
+    if (res.body) {
+      const out = new Uint8Array(total)
+      const reader = res.body.getReader()
+      let got = 0
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (got + value.length > total) throw new Error('size')
+        out.set(value, got)
+        got += value.length
+        progress.value = got / total
+      }
+      if (got !== total) throw new Error('size')
+      buf = out.buffer
+    } else {
+      buf = await res.arrayBuffer()
     }
-    vol.value = arr
+    vol.value = toInt16(buf)
     status.value = 'ok'
   } catch {
     status.value = 'error'
   }
+}
+watch([vol, refSlice, plane, k, j, i, c, w, canvas], draw, { flush: 'post' })
+
+const statusText = computed(() => {
+  if (status.value === 'loading') return `завантаження серії: ${Math.round(progress.value * 100)} %`
+  if (status.value === 'error') return 'не вдалося завантажити серію'
+  if (refStatus.value === 'loading') return 'завантаження зрізу…'
+  if (refStatus.value === 'error') return 'не вдалося завантажити зріз'
+  return 'завантаження серії…'
 })
-watch([vol, plane, k, j, i, c, w, canvas], draw, { flush: 'post' })
+function choosePlane(p: Plane) {
+  plane.value = p
+  if (p !== 'axial') ensureVolume()
+}
 
 /** Лінії перетину з двома іншими площинами, у відсотках розміру перерізу */
 const cross = computed(() => {
@@ -151,14 +213,10 @@ function pixelOf(e: MouseEvent): [number, number] | null {
   return [x, y]
 }
 function onMove(e: MouseEvent) {
-  const v = vol.value
   const p = pixelOf(e)
-  if (!v || !p) {
-    hover.value = null
-    return
-  }
-  const [kk, jj, ii] = voxelAt(p[0], p[1])
-  hover.value = { hu: v[(kk * NY + jj) * NX + ii], ii: ii * STEP, jj: jj * STEP, kk }
+  const [kk, jj, ii] = p ? voxelAt(p[0], p[1]) : [0, 0, 0]
+  const hu = p ? sample(kk, jj, ii) : null
+  hover.value = hu === null ? null : { hu, ii: ii * STEP, jj: jj * STEP, kk }
 }
 /** Клік переносить перетин двох інших площин у цю точку */
 function onClick(e: MouseEvent) {
@@ -176,6 +234,7 @@ const slice = computed({
     if (plane.value === 'axial') k.value = v
     else if (plane.value === 'coronal') j.value = v
     else i.value = v
+    ensureVolume()
   },
 })
 const sliceMax = computed(() => (plane.value === 'axial' ? NZ - 1 : plane.value === 'coronal' ? NY - 1 : NX - 1))
@@ -269,7 +328,7 @@ const TICKS = [-1000, -500, 0, 500, 1000, 1500]
       <div class="cw__view">
         <div class="lab__pills cw__planes">
           <button v-for="p in PLANES" :key="p.id" class="lab__pill" type="button"
-                  :class="{ 'is-on': plane === p.id }" @click="plane = p.id">{{ p.label }}</button>
+                  :class="{ 'is-on': plane === p.id }" @click="choosePlane(p.id)">{{ p.label }}</button>
           <button class="lab__pill" type="button" @click="toReference">еталонний зріз</button>
         </div>
         <div class="cw__frame" :style="{ aspectRatio: aspect }">
@@ -284,14 +343,25 @@ const TICKS = [-1000, -500, 0, 500, 1000, 1500]
           <span class="cw__lab cw__lab--b">{{ LABELS[plane][1] }}</span>
           <span class="cw__lab cw__lab--l">{{ LABELS[plane][2] }}</span>
           <span class="cw__lab cw__lab--r">{{ LABELS[plane][3] }}</span>
-          <div v-if="status !== 'ok'" class="cw__status">
-            {{ status === 'loading' ? 'завантаження об’єму (4,4 МБ)…' : 'не вдалося завантажити об’єм' }}
-          </div>
+          <div v-if="!canDraw || refStatus === 'error'" class="cw__status">{{ statusText }}</div>
         </div>
         <div class="cw__slice">
           <button class="lab__btn" type="button" aria-label="попередній" @click="stepSlice(-1)">−</button>
           <input type="range" min="0" :max="sliceMax" step="1" v-model.number="slice" aria-label="номер перерізу" />
           <button class="lab__btn" type="button" aria-label="наступний" @click="stepSlice(1)">+</button>
+        </div>
+        <div v-if="status !== 'ok'" class="cw__load">
+          <button v-if="status !== 'loading'" class="lab__pill" type="button" @click="ensureVolume">
+            {{ status === 'error' ? 'спробувати ще раз' : 'завантажити всю серію' }}: {{ NZ }} зрізи,
+            ≈ {{ mb(data.bin_gzip as number) }} МБ
+          </button>
+          <div v-else class="cw__bar-wrap" role="progressbar" :aria-valuenow="Math.round(progress * 100)"
+               aria-valuemin="0" aria-valuemax="100">
+            <div class="cw__bar-fill" :style="{ width: `${progress * 100}%` }"></div>
+            <span>завантаження серії: {{ Math.round(progress * 100) }} %</span>
+          </div>
+          <div class="cw__hint">Поки серію не завантажено, видно еталонний зріз: вікно, HU під курсором і
+            гістограма вже працюють. Гортання зрізів і інші площини завантажать серію самі.</div>
         </div>
         <div class="cw__probe">
           <div>{{ sliceLabel }}</div>
@@ -396,6 +466,7 @@ const TICKS = [-1000, -500, 0, 500, 1000, 1500]
 .cw__status {
   position: absolute;
   inset: 0;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -421,6 +492,18 @@ const TICKS = [-1000, -500, 0, 500, 1000, 1500]
 }
 .cw__probe b { font-family: var(--vp-font-family-mono); color: var(--uk-accent); font-weight: 500; }
 .cw__hint { color: var(--vp-c-text-3); }
+.cw__load { max-width: 440px; margin-top: 0.55rem; font-size: 0.78rem; }
+.cw__load .lab__pill { margin-bottom: 0.35rem; }
+.cw__bar-wrap {
+  position: relative;
+  height: 1.6rem;
+  border: 1px solid var(--uk-line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+.cw__bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-accent-soft); transition: width 0.15s; }
+.cw__bar-wrap span { position: relative; display: block; line-height: 1.6rem; padding: 0 0.7rem; color: var(--vp-c-text-2); }
 .cw__side svg { width: 100%; height: auto; display: block; }
 .cw__cap { font-size: 0.76rem; color: var(--vp-c-text-3); margin: 0.2rem 0 0.35rem; line-height: 1.4; }
 .cw__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0.5rem; }
