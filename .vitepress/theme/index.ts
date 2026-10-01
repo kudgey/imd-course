@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
-import { h } from 'vue'
+import { defineAsyncComponent, h } from 'vue'
 import './style.css'
 
 import Figure from './components/Figure.vue'
@@ -16,9 +16,11 @@ import Timeline from './components/Timeline.vue'
 import Resources from './components/Resources.vue'
 import Flow from './components/Flow.vue'
 
-// Віджети лекцій (*Lab.vue) реєструються автоматично за іменем файлу:
-// новий віджет не потребує правки цього файла.
-const labs = import.meta.glob('./components/*Lab.vue', { eager: true }) as Record<string, { default: any }>
+// Віджети лекцій (*Lab.vue) реєструються автоматично за іменем файлу: новий віджет не
+// потребує правки цього файла. Реєстрація асинхронна — кожен віджет (код і імпортовані
+// JSON-дані) іде окремим фрагментом і вантажиться лише на сторінці, де він стоїть.
+// З eager: true усі віджети всіх лекцій потрапляли в спільний бандл кожної сторінки.
+const labs = import.meta.glob('./components/*Lab.vue') as Record<string, () => Promise<{ default: any }>>
 
 export default {
   extends: DefaultTheme,
@@ -39,8 +41,8 @@ export default {
     app.component('Timeline', Timeline)
     app.component('Resources', Resources)
     app.component('Flow', Flow)
-    for (const [path, mod] of Object.entries(labs)) {
-      app.component(path.split('/').pop()!.replace('.vue', ''), mod.default)
+    for (const [path, load] of Object.entries(labs)) {
+      app.component(path.split('/').pop()!.replace('.vue', ''), defineAsyncComponent(load))
     }
   },
 } satisfies Theme

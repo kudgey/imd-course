@@ -338,7 +338,7 @@ const TICKS = [-1000, -500, 0, 500, 1000, 1500]
           <div class="cw__line cw__line--h" :style="{ top: `${cross.y * 100}%` }"></div>
           <div v-if="showNodule" class="cw__nodule"
                :style="{ left: `${((NOD[0] + 0.5) / (NX * STEP)) * 100}%`, top: `${((NOD[1] + 0.5) / (NY * STEP)) * 100}%` }"
-               title="центр вузла (314, 365, 89)"></div>
+               title="центр вузла (315, 366, 89)"></div>
           <span class="cw__lab cw__lab--t">{{ LABELS[plane][0] }}</span>
           <span class="cw__lab cw__lab--b">{{ LABELS[plane][1] }}</span>
           <span class="cw__lab cw__lab--l">{{ LABELS[plane][2] }}</span>
