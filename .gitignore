@@ -13,3 +13,4 @@ shot*.mjs
 *.png
 !public/**/*.png
 README.md
+*.lock
