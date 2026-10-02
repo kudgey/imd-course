@@ -1,0 +1,28 @@
+{
+ "image": "/data/lec09/iou_6dab58eb.jpg",
+ "id": "6dab58eb-6ef9-45c3-8c94-6e06ad01576b",
+ "w": 320,
+ "h": 273,
+ "gt": [
+  52.48,
+  42.7,
+  153.31,
+  173.38
+ ],
+ "pred": [
+  51.22,
+  41.71,
+  152.26,
+  173.08
+ ],
+ "conf": 0.9631,
+ "iou": 0.9679,
+ "inter_px": 49151,
+ "union_px": 50780,
+ "orig_size": [
+  622,
+  531
+ ],
+ "shift_example_iou": 0.6,
+ "train_similarity": 0.6756
+}
