@@ -25,6 +25,10 @@ export default defineConfig({
   // .ipynb лежить у public/ як файл для завантаження; VitePress шукає таку сторінку
   // й вважає посилання мертвим. Наявність файла перевіряє tools/check_links.py.
   ignoreDeadLinks: [/\.ipynb$/],
+  // Без попереднього завантаження сторінок за посиланнями: сайдбар показує всі лекції, і
+  // VitePress тягнув JS-фрагменти кожної видимої лекції (≈ 0,1 МБ на лекцію) — на телефоні це
+  // зайвий трафік, що росте з кожною новою лекцією (гейт ваги ≤ 3 МБ у tools/audit.mjs).
+  router: { prefetchLinks: false },
   markdown: {
     math: true,
     lineNumbers: true,
