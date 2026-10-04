@@ -52,6 +52,9 @@ const published: string[] = theme.value.published ?? []
     <p class="uk-sources__note">
       Статті, набори даних і документація до кожної теми — в останньому розділі кожної лекції.
     </p>
+    <p class="uk-sources__note">
+      <a :href="withBase('/docs/silabus.pdf')">Силабус дисципліни (PDF)</a>
+    </p>
   </section>
 </template>
 
