@@ -39,7 +39,7 @@ const xTickIdx = [0, 2, 4, 6, 8, 10, 12]
         <div class="lab__title">Крива валідації LightGBM: складність дерева і кількість дерев</div>
         <div class="lab__sub">
           Середнє за п’ятьма фолдами курсу dev0…dev4; крок навчання 0,1. Вертикальна риска — вибрана кількість дерев, зелена
-          точка — мінімум log-loss на валідаційних фолдах.
+          точка — мінімум крос-ентропії (log-loss) на валідаційних фолдах.
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@ const xTickIdx = [0, 2, 4, 6, 8, 10, 12]
       <div class="lab__ctl">
         <span>міра на графіку</span>
         <div class="lab__pills">
-          <button type="button" class="lab__pill" :class="{ 'is-on': metric === 'll' }" @click="metric = 'll'">log-loss</button>
+          <button type="button" class="lab__pill" :class="{ 'is-on': metric === 'll' }" @click="metric = 'll'">крос-ентропія</button>
           <button type="button" class="lab__pill" :class="{ 'is-on': metric === 'auc' }" @click="metric = 'auc'">AUC</button>
         </div>
       </div>
@@ -83,12 +83,12 @@ const xTickIdx = [0, 2, 4, 6, 8, 10, 12]
 
     <div class="lab__stats">
       <div class="lab__stat"><b>{{ num(c.auc_train[ti]) }} / {{ num(c.auc_val[ti]) }}</b><span>AUC навч. / валід.</span></div>
-      <div class="lab__stat is-warm"><b>{{ num(c.ll_val[ti]) }}</b><span>log-loss на валідаційному фолді</span></div>
+      <div class="lab__stat is-warm"><b>{{ num(c.ll_val[ti]) }}</b><span>крос-ентропія на валідаційному фолді</span></div>
       <div class="lab__stat"><b>{{ num(c.auc_train[ti] - c.auc_val[ti]) }}</b><span>розрив AUC навч. − валід.</span></div>
-      <div class="lab__stat is-green"><b>{{ TREES[bestI] }} дерев</b><span>мінімум log-loss: {{ num(c.ll_val[bestI]) }}</span></div>
+      <div class="lab__stat is-green"><b>{{ TREES[bestI] }} дерев</b><span>мінімум крос-ентропії: {{ num(c.ll_val[bestI]) }}</span></div>
     </div>
     <p class="lab__note">
-      Перемкніть міру. На log-loss валідаційна крива має виразний мінімум, після якого росте, хоча навчальна падає до нуля;
+      Перемкніть міру. На крос-ентропії валідаційна крива має виразний мінімум, після якого росте, хоча навчальна падає до нуля;
       на AUC та сама модель після мінімуму ще трохи покращується або стоїть на місці. Ранжування знімків псується пізніше,
       ніж імовірності: модель стає надто впевненою раніше, ніж починає плутати порядок.
     </p>
