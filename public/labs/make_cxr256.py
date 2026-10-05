@@ -62,9 +62,14 @@ def main(argv):
     root = pathlib.Path(argv[argv.index("--root") + 1]).resolve() if "--root" in argv else ROOT
     src, out = root / "data/nlm", root / "data/nlm/cxr256"
     files = sources(src)
-    if len(files) != 800:
-        print(f"очікувалося 800 PNG у {src}/<Montgomery|Shenzhen>/CXR_png, знайдено {len(files)}")
+    # корінь курсу — рівно 800 знімків; у студента (--root) може бути лише один набір
+    need_all = "--root" not in argv
+    if (need_all and len(files) != 800) or not files:
+        print(f"очікувалося {'800' if need_all else 'хоча б один'} PNG у "
+              f"{src}/<Montgomery|Shenzhen>/CXR_png, знайдено {len(files)}")
         return 1
+    counts = {s: sum(f.parent.parent.name == s for f in files) for s in SETS}
+    print("знайдено:", ", ".join(f"{s} {n}" for s, n in counts.items()))
     with ProcessPoolExecutor(8) as ex:
         res = list(ex.map(shrink, files, chunksize=8))
     rows = [r for r, _ in res]

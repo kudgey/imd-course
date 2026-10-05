@@ -1,5 +1,5 @@
 # Середовище студента для лабораторних робіт курсу «Аналіз медичних зображень»
-# Python 3.12 (перевірено у чистому venv на macOS arm64). Встановлення:
+# Python 3.12 (перевірено у чистому venv на macOS arm64, 05.10.2026 — разом з усіма блоками нижче). Встановлення:
 #   python3.12 -m venv .venv && source .venv/bin/activate
 #   pip install -r requirements-students.txt
 # Версії закріплені: відтворюваність — частина кожної лабораторної.
@@ -30,3 +30,76 @@ grad-cam==1.5.7
 notebook==7.6.3
 ipykernel==7.2.0
 tqdm==4.67.3
+
+# --- детектор рамок (додатковий трек ЛР3); ліцензія ultralytics — AGPL-3.0.
+# Пастка: import ultralytics без змінної OMP_NUM_THREADS лишає torch з 1 потоком —
+# задайте змінну до імпорту або torch.set_num_threads(...) після.
+ultralytics==8.4.115
+ultralytics-thop==2.2.2
+opencv-python==5.0.0.93
+polars==1.44.2
+polars-runtime-32==1.44.2
+nvidia-ml-py==13.615.71
+
+# --- планування nnU-Net v2 (ЛР4) і його закріплені залежності
+nnunetv2==2.6.4
+acvl-utils==0.2.6
+batchgenerators==0.25.3
+batchgeneratorsv2==0.3.5
+blosc2==4.14.1
+connected-components-3d==4.1.0
+dynamic-network-architectures==0.4.4
+einops==0.8.2
+graphviz==0.21
+imagecodecs==2026.8.16
+seaborn==0.13.2
+tifffile==2026.9.20
+yacs==0.1.8
+future==1.0.0
+unittest2==1.1.0
+
+# --- сервіс прототипу (ЛР6)
+fastapi==0.136.1
+starlette==1.7.0
+uvicorn==0.54.0
+annotated-doc==0.0.5
+httpx==0.28.1
+
+# --- за бажанням: експорт і виконання ONNX ---
+# onnx==1.23.1
+# onnxruntime==1.30.0
+# protobuf==7.36.2
+# flatbuffers==25.12.19
+# ml_dtypes==0.6.0
+
+# --- за бажанням: веб-інтерфейс замість API — Gradio ---
+# gradio==6.29.1
+# gradio_client==2.7.2
+# hf-gradio==0.4.1
+# python-multipart==0.0.32
+# orjson==3.12.0
+# brotli==1.2.0
+# groovy==0.1.2
+# pydub==0.25.1
+# pytz==2026.5
+# rich==15.0.0
+# markdown-it-py==4.2.0
+# mdurl==0.1.2
+# safehttpx==0.1.7
+# semantic-version==2.10.0
+# shellingham==1.5.4
+# tomlkit==0.14.0
+# typer==0.27.2
+
+# --- за бажанням: веб-інтерфейс замість API — Streamlit
+# (ще потребує protobuf==7.36.2 з блоку ONNX і python-multipart==0.0.32 з блоку Gradio:
+#  якщо ці блоки закоментовані, розкоментуйте ці два рядки там) ---
+# streamlit==1.65.0
+# altair==6.3.0
+# narwhals==2.26.0
+# pyarrow==25.0.1
+# pydeck==0.9.3
+# toml==0.10.2
+# websockets==17.2
+# httptools==0.8.0
+# itsdangerous==2.2.0
